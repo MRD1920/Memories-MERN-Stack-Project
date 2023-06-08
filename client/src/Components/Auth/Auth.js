@@ -9,7 +9,7 @@ import {
   Container,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
-import { GoogleLogin } from "react-google-login";
+// import { GoogleLogin } from "react-google-login";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 
 import Icon from "./icon";
@@ -17,6 +17,8 @@ import { signin, signup } from "../../actions/auth";
 import { AUTH } from "../../constants/actionTypes";
 import useStyles from "./styles";
 import Input from "./Input";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode";
 
 const initialState = {
   firstName: "",
@@ -53,8 +55,13 @@ const SignUp = () => {
   };
 
   const googleSuccess = async (res) => {
-    const result = res?.profileObj;
-    const token = res?.tokenId;
+    const result = jwt_decode(res.credential);
+    const token = res?.credential;
+
+    // console.log(
+    //   "The decoded data from the res object is :-",
+    //   jwt_decode(res.credential)
+    // );
 
     try {
       dispatch({ type: AUTH, data: { result, token } });
@@ -63,6 +70,8 @@ const SignUp = () => {
     } catch (error) {
       console.log(error);
     }
+    console.log(res.credential);
+    console.log(res);
   };
 
   const googleError = () =>
@@ -131,7 +140,6 @@ const SignUp = () => {
             {isSignup ? "Sign Up" : "Sign In"}
           </Button>
           <GoogleLogin
-            clientId="564033717568-e5p23rhvcs4i6kffgsbci1d64r8hp6fn.apps.googleusercontent.com"
             render={(renderProps) => (
               <Button
                 className={classes.googleButton}
@@ -146,7 +154,7 @@ const SignUp = () => {
               </Button>
             )}
             onSuccess={googleSuccess}
-            onFailure={googleError}
+            onError={googleError}
             cookiePolicy="single_host_origin"
           />
           <Grid container justify="flex-end">
